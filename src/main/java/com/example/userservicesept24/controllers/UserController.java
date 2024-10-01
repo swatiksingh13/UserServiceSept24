@@ -53,7 +53,8 @@ public class UserController {
 
     @GetMapping("/validate")
     public UserDto validateToken(String token) {
-        return null;
+        User user = userService.validateToken(token);
+        return UserDto.from(user);
     }
 
 }

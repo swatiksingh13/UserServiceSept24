@@ -6,7 +6,6 @@ import com.example.userservicesept24.repositories.TokenRepository;
 import com.example.userservicesept24.repositories.UserRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -63,11 +62,38 @@ public class UserService {
     }
 
     public void logout(String tokenValue) {
+        Optional<Token> optionalToken = tokenRepository.findByValueAndDeletedAndExpiryAtGreaterThan(
+                tokenValue,
+                false,
+                new Date()
+        );
 
+        if (optionalToken.isEmpty()) {
+            //throw TokenInvalidException
+            return;
+        }
+
+        Token token = optionalToken.get();
+
+        token.setDeleted(true);
+        tokenRepository.save(token);
     }
 
     public User validateToken(String tokenValue) {
-        return null;
+        //First find out that the token with the value is present in the DB or not.
+        //Expiry time of the token > current time and deleted should be false.
+        Optional<Token> optionalToken = tokenRepository.findByValueAndDeletedAndExpiryAtGreaterThan(
+                tokenValue,
+                false,
+                new Date() // currentTime
+        );
+
+        if (optionalToken.isEmpty()) {
+            //token is invalid;
+            return null;
+        }
+
+        return optionalToken.get().getUser();
     }
 
     private Token createToken(User user) {
