@@ -61,4 +61,11 @@ public class UserController {
         return UserDto.from(user);
     }
 
+
+    // http://localhost:7070/users/1
+    @GetMapping("/{id}")
+    public UserDto getUserDetails(Long userId) {
+        System.out.println("Got the request from ProductService");
+        return new UserDto();
+    }
 }
